@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Städa</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- <h2>Städa</h2> -->
+  <input type="file" id="fileInput" />
+  <input type="text" id="descInput" placeholder="Enter description" />
+  <button onclick="uploadImage()">Add Image</button>
+  <button onclick="addBlank()">Add Blank</button>
+
+  <div id="imageGrid" class="grid"></div>
+
+  <div id="popup" class="popup hidden">
+    <span class="close">&times;</span>
+    <img id="popupImg" />
+    <p id="popupDesc" class="popup-desc"></p>
+    <button id="popupDeleteBtn" class="delete-btn">🗑️ Delete</button>
+  </div>
+  
+
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <script src="/static/script.js"></script>
+</body>
+</html>

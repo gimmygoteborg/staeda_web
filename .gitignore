@@ -1,0 +1,18 @@
+# Ignore all image files
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.avif
+*.JPG
+*.JPEG
+*.PNG
+*.WEBP
+*.AVIF
+*.heic
+*.tiff
+*.bmp
+*.gif
+
+# But do not ignore blank_dots3.jpg
+!blank_dots3.jpg
