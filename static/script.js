@@ -1,39 +1,70 @@
 let metadata = [];
+let currentIndex = 0;
+let isLoading = false;
+let batchSize = 50; // default fallback
 
 fetch('/metadata.json')
   .then(res => res.json())
   .then(data => {
     metadata = data.sort((a, b) => a.order - b.order);
-    renderImages();
+    batchSize = calculateInitialBatchSize(); // determine how many to load
+    renderNextBatch();
+    window.addEventListener('scroll', handleScroll);
   });
 
-function renderImages() {
+  function calculateInitialBatchSize() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+  
+    const itemMinWidth = 120; // from CSS
+    const gridGap = 10;
+    const totalPadding = 20; // .grid padding: 10px left + right
+  
+    const availableWidth = screenWidth - totalPadding;
+    const colCount = Math.floor((availableWidth + gridGap) / (itemMinWidth + gridGap));
+  
+    const itemHeight = itemMinWidth + gridGap; // account for gap as row spacing too
+    const rowCount = Math.ceil(screenHeight / itemHeight) + 2; // buffer rows
+  
+    return colCount * rowCount;
+  }
+  
+function renderNextBatch() {
+  if (isLoading) return;
+  isLoading = true;
+
   const grid = document.getElementById('imageGrid');
-  grid.innerHTML = '';
-  metadata.forEach((item, index) => {
+  const end = Math.min(currentIndex + batchSize, metadata.length);
+  for (let i = currentIndex; i < end; i++) {
+    const item = metadata[i];
     const img = document.createElement('img');
     img.src = `images/${item.filename}`;
     img.alt = item.description;
     img.dataset.id = item.id;
+    img.loading = "lazy";
     img.onclick = () => openPopup(item);
     grid.appendChild(img);
-  });
+  }
 
-  Sortable.create(grid, {
-    animation: 150,
-    onEnd: function () {
-      const newOrder = [...grid.children].map(img => img.dataset.id);
-  
-      metadata = newOrder.map((id, index) => {
-        const item = metadata.find(m => m.id === id);
-        return { ...item, order: index };
-      });
-  
-      saveMetadata();
-    }
-  });
-  
+  currentIndex = end;
+  isLoading = false;
+
+  if (currentIndex >= metadata.length) {
+    window.removeEventListener('scroll', handleScroll);
+  }
 }
+
+function handleScroll() {
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  const scrollHeight = document.documentElement.scrollHeight;
+  const clientHeight = document.documentElement.clientHeight;
+
+  if (scrollTop + clientHeight >= scrollHeight - 100) {
+    renderNextBatch();
+  }
+}
+
+
 
 function openPopup(item) {
   const popup = document.getElementById('popup');
