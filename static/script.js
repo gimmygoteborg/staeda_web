@@ -29,21 +29,55 @@ fetch('/metadata.json')
     return colCount * rowCount;
   }
   
+// function renderNextBatch() {
+//   if (isLoading) return;
+//   isLoading = true;
+
+//   const grid = document.getElementById('imageGrid');
+//   const end = Math.min(currentIndex + batchSize, metadata.length);
+//   for (let i = currentIndex; i < end; i++) {
+//     const item = metadata[i];
+//     const img = document.createElement('img');
+//     img.src = `images/${item.filename}`;
+//     img.alt = item.description;
+//     img.dataset.id = item.id;
+//     img.loading = "lazy";
+//     img.onclick = () => openPopup(item);
+//     grid.appendChild(img);
+//   }
+
+//   currentIndex = end;
+//   isLoading = false;
+
+//   if (currentIndex >= metadata.length) {
+//     window.removeEventListener('scroll', handleScroll);
+//   }
+// }
+
+let sortableInstance;
+
 function renderNextBatch() {
   if (isLoading) return;
   isLoading = true;
 
   const grid = document.getElementById('imageGrid');
   const end = Math.min(currentIndex + batchSize, metadata.length);
+
   for (let i = currentIndex; i < end; i++) {
     const item = metadata[i];
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'image-wrapper';
+    wrapper.dataset.id = item.id;
+
     const img = document.createElement('img');
     img.src = `images/${item.filename}`;
     img.alt = item.description;
-    img.dataset.id = item.id;
     img.loading = "lazy";
     img.onclick = () => openPopup(item);
-    grid.appendChild(img);
+
+    wrapper.appendChild(img);
+    grid.appendChild(wrapper);
   }
 
   currentIndex = end;
@@ -52,7 +86,23 @@ function renderNextBatch() {
   if (currentIndex >= metadata.length) {
     window.removeEventListener('scroll', handleScroll);
   }
+
+  // Enable sorting once after first batch
+  if (!sortableInstance) {
+    sortableInstance = Sortable.create(grid, {
+      animation: 150,
+      onEnd: () => {
+        const newOrder = [...grid.children].map(child => child.dataset.id);
+        metadata = newOrder.map((id, index) => {
+          const item = metadata.find(m => m.id === id);
+          return { ...item, order: index };
+        });
+        saveMetadata();
+      }
+    });
+  }
 }
+
 
 function handleScroll() {
   const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -63,8 +113,6 @@ function handleScroll() {
     renderNextBatch();
   }
 }
-
-
 
 function openPopup(item) {
   const popup = document.getElementById('popup');
