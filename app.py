@@ -1,6 +1,8 @@
 from flask import Flask, request, send_from_directory, jsonify
 import os, json
+import uuid
 from werkzeug.utils import secure_filename
+
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'images'
@@ -27,13 +29,19 @@ def metadata():
 def upload_file():
     file = request.files['image']
     description = request.form['description']
-    filename = secure_filename(file.filename)
+    # filename = secure_filename(file.filename)
+    # filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    unique_id = str(uuid.uuid4())
+    ext = os.path.splitext(file.filename)[1]  # Gets the original file extension
+    filename = f"{unique_id}{ext}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
     file.save(filepath)
 
     with open('metadata.json') as f:
         metadata = json.load(f)
     new_item = {
+        "id": str(uuid.uuid4()),  # generate a unique ID
         "filename": filename,
         "description": description,
         "order": len(metadata)

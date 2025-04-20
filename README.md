@@ -45,5 +45,5 @@ A minimal, visual web app to help you **declutter** and **track your items** —
 
 python -m http.server
 
-http://localhost:8000
 http://127.0.0.1:5000/
+
